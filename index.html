@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Кто ты из ковена Неделька?</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Montserrat',sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 25%,#f093fb 50%,#4facfe 75%,#00f2fe 100%);
+      background-size:400% 400%;animation:gradientShift 15s ease infinite;
+      min-height:100vh;padding:20px;position:relative;overflow-x:hidden
+    }
+    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .sparkles{position:fixed;inset:0;pointer-events:none;z-index:1}
+    .sparkle{position:absolute;font-size:20px;animation:float 4s infinite;opacity:.7}
+    @keyframes float{0%,100%{transform:translateY(0) rotate(0);opacity:.7}50%{transform:translateY(-30px) rotate(180deg);opacity:1}}
+    .container{
+      max-width:750px;margin:0 auto;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);
+      border-radius:30px;padding:50px;box-shadow:0 20px 60px rgba(0,0,0,.3),inset 0 0 50px rgba(255,255,255,.5);
+      position:relative;z-index:2;border:3px solid rgba(255,255,255,.8)
+    }
+    h1{
+      text-align:center;font-family:'Playfair Display',serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      font-size:3em;margin-bottom:10px;font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,.1);animation:shimmer 3s infinite
+    }
+    @keyframes shimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.2)}}
+    .subtitle{text-align:center;color:#764ba2;font-style:italic;margin-bottom:30px;font-size:1.2em;font-weight:300}
+    /* Progress */
+    .progress-wrap{margin:0 auto 30px;max-width:650px}
+    .progress{
+      width:100%;height:10px;border-radius:999px;background:rgba(118,75,162,.15);
+      overflow:hidden;box-shadow:inset 0 0 0 2px rgba(118,75,162,.25)
+    }
+    .progress-bar{
+      height:100%;width:0%;background:linear-gradient(90deg,#667eea,#f093fb);
+      transition:width .35s ease
+    }
+    .progress-label{margin-top:8px;text-align:right;color:#764ba2;font-size:.9em}
+    .question{
+      margin-bottom:28px;padding:26px;
+      background:linear-gradient(135deg,rgba(102,126,234,.08) 0%,rgba(118,75,162,.08) 100%);
+      border-radius:20px;border:2px solid transparent;background-clip:padding-box;position:relative;transition:all .35s ease
+    }
+    .question::before{
+      content:'';position:absolute;inset:-2px;background:linear-gradient(135deg,#667eea,#764ba2,#f093fb);
+      border-radius:20px;z-index:-1;opacity:0;transition:opacity .35s ease
+    }
+    .question:hover::before{opacity:.25}
+    .question:hover{transform:translateY(-4px);box-shadow:0 15px 40px rgba(102,126,234,.25)}
+    .question h3{font-family:'Playfair Display',serif;color:#764ba2;margin-bottom:16px;font-size:1.2em;font-weight:600}
+    .options{display:flex;flex-direction:column;gap:10px}
+    .option{
+      padding:14px 18px;background:rgba(255,255,255,.75);border:2px solid rgba(102,126,234,.28);
+      border-radius:15px;cursor:pointer;transition:all .25s ease;color:#333;font-weight:400;position:relative;overflow:hidden
+    }
+    .option::before{
+      content:'';position:absolute;left:50%;top:50%;width:0;height:0;border-radius:50%;
+      background:linear-gradient(135deg,rgba(102,126,234,.18),rgba(240,147,251,.18));
+      transform:translate(-50%,-50%);transition:width .45s ease,height .45s ease
+    }
+    .option:hover::before{width:480px;height:480px}
+    .option:hover{border-color:#764ba2;transform:scale(1.02);box-shadow:0 10px 30px rgba(102,126,234,.25)}
+    .option.selected{
+      background:linear-gradient(135deg,rgba(102,126,234,.28),rgba(240,147,251,.28));
+      border-color:#f093fb;box-shadow:0 10px 40px rgba(240,147,251,.35),inset 0 0 20px rgba(255,255,255,.5);
+      transform:scale(1.03);font-weight:600
+    }
+    .btn{
+      display:block;width:100%;padding:18px;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);background-size:200% 200%;
+      color:#fff;border:none;border-radius:20px;font-size:1.15em;font-weight:700;cursor:pointer;margin-top:24px;
+      transition:all .35s ease;font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:3px;
+      box-shadow:0 10px 30px rgba(102,126,234,.35);position:relative;overflow:hidden
+    }
+    .btn:hover{background-position:100% 0;transform:translateY(-3px);box-shadow:0 15px 50px rgba(240,147,251,.5)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .result{
+      padding:34px;background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,255,255,.75));
+      border-radius:25px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);border:3px solid;animation:resultAppear .6s ease
+    }
+    @keyframes resultAppear{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+    .result h2{font-family:'Playfair Display',serif;font-size:2.2em;margin-bottom:10px;font-weight:700}
+    .result .kicker{letter-spacing:.2em;text-transform:uppercase;font-size:.85em;color:#666;margin-bottom:14px}
+    .result p{color:#333;line-height:1.75;font-size:1.05em;margin:10px 0 6px}
+    .result-icon{font-size:4.2em;margin-bottom:14px;animation:bounce 1s infinite}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+    .result-trait{background:rgba(102,126,234,.1);padding:12px;border-radius:14px;margin:10px 0;font-weight:700;color:#764ba2}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid rgba(118,75,162,.25);background:rgba(118,75,162,.06);font-size:.9em;color:#51306e}
+    .cta-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+    .ghost{
+      background:transparent;border:2px solid #764ba2;color:#764ba2
+    }
+    .hidden{display:none}
+    @media (max-width:600px){
+      .container{padding:28px 18px}
+      h1{font-size:2em}
+      .question h3{font-size:1.05em}
+      .btn{font-size:.95em;letter-spacing:2px}
+    }
+  </style>
+</head>
+<body>
+  <div class="sparkles">
+    <div class="sparkle" style="left:10%;top:20%;animation-delay:0s">✨</div>
+    <div class="sparkle" style="left:80%;top:30%;animation-delay:1s">💫</div>
+    <div class="sparkle" style="left:30%;top:60%;animation-delay:2s">⭐</div>
+    <div class="sparkle" style="left:70%;top:70%;animation-delay:1.5s">✨</div>
+    <div class="sparkle" style="left:50%;top:10%;animation-delay:.5s">💖</div>
+    <div class="sparkle" style="left:20%;top:80%;animation-delay:2.5s">💫</div>
+  </div>
+
+  <div class="container">
+    <h1>✨ Кто ты из Недельки? ✨</h1>
+    <p class="subtitle">Мегаглам тест для королев и тёмных принцесс школы №2</p>
+
+    <div class="progress-wrap">
+      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-label" id="progressLabel">0% • 0 из 0</div>
+    </div>
+
+    <div id="quiz">
+      <!-- Q1 -->
+      <div class="question">
+        <h3>1. В ленте вспыхнул новый beauty-тренд. Твоя первая мысль?</h3>
+        <div class="options">
+          <div class="option" data-q="1" data-a="Monday"><span>Запишу туториал первой. Порядок вещей восстановлен.</span></div>
+          <div class="option" data-q="1" data-a="Tuesday"><span>Спрошу у «своей» — и сделаю идеально как у неё.</span></div>
+          <div class="option" data-q="1" data-a="Wednesday"><span>Будет чёрный лайнер как кровь заката — или не будет ничего.</span></div>
+          <div class="option" data-q="1" data-a="Thursday"><span>Состав, клинические данные, контроль слепых зон — дальше решим.</span></div>
+          <div class="option" data-q="1" data-a="Friday"><span>Беру всё неон-глянцевое. Танцпол уже ждёт.</span></div>
+          <div class="option" data-q="1" data-a="Saturday"><span>В план и по чек-листу — красота это тоже менеджмент.</span></div>
+          <div class="option" data-q="1" data-a="Sunday"><span>Сохраню. Через два дня вспомню в 02:17 с лёгкой паникой.</span></div>
+        </div>
+      </div>
+      <!-- Q2 -->
+      <div class="question">
+        <h3>2. Суперсила на сутки. Что берёшь?</h3>
+        <div class="options">
+          <div class="option" data-q="2" data-a="Monday"><span>Аура влияния: люди делают то, что я сказала.</span></div>
+          <div class="option" data-q="2" data-a="Tuesday"><span>Чтение подтекстов. Чтобы быть идеальной опорой.</span></div>
+          <div class="option" data-q="2" data-a="Wednesday"><span>Повеление тенями. Невидимость — моя улыбка.</span></div>
+          <div class="option" data-q="2" data-a="Thursday"><span>Мгновенная интеграция знаний. Все олимпиады — мои.</span></div>
+          <div class="option" data-q="2" data-a="Friday"><span>Телепорт. От вечеринки к афтепати — без такси.</span></div>
+          <div class="option" data-q="2" data-a="Saturday"><span>Стоп-кадр времени. План выполнен на 120%.</span></div>
+          <div class="option" data-q="2" data-a="Sunday"><span>Личное поле безопасности. Пожалуйста, не трогайте.</span></div>
+        </div>
+      </div>
+      <!-- Q3 -->
+      <div class="question">
+        <h3>3. Идеальный пятничный вечер?</h3>
+        <div class="options">
+          <div class="option" data-q="3" data-a="Monday"><span>Собираю всех вокруг своей орбиты. Да, я солнце.</span></div>
+          <div class="option" data-q="3" data-a="Tuesday"><span>Где моя лучшая? Там и я. Мы дуэт.</span></div>
+          <div class="option" data-q="3" data-a="Wednesday"><span>Хорроры, вороньи перья и идеальный чёрный чай.</span></div>
+          <div class="option" data-q="3" data-a="Thursday"><span>Разбор задач и новая статья «Nature». Звучит горячо.</span></div>
+          <div class="option" data-q="3" data-a="Friday"><span>Бликующий хайлайт и танцы до рассвета.</span></div>
+          <div class="option" data-q="3" data-a="Saturday"><span>Спорт, уход, капсульный гардероб на неделю.</span></div>
+          <div class="option" data-q="3" data-a="Sunday"><span>План был. Тревога победила. Плед, тетрадь, «ой».</span></div>
+        </div>
+      </div>
+      <!-- Q4 -->
+      <div class="question">
+        <h3>4. Аксессуар, который ты не забудешь?</h3>
+        <div class="options">
+          <div class="option" data-q="4" data-a="Monday"><span>Метальная корона — иногда невидимая.</span></div>
+          <div class="option" data-q="4" data-a="Tuesday"><span>Браслет дружбы. Он важнее трендов.</span></div>
+          <div class="option" data-q="4" data-a="Wednesday"><span>Чокер, острый как сарказм.</span></div>
+          <div class="option" data-q="4" data-a="Thursday"><span>Умные часы. Пульс знаний — под контролем.</span></div>
+          <div class="option" data-q="4" data-a="Friday"><span>Серьги-созвездия. Видны даже из космоса.</span></div>
+          <div class="option" data-q="4" data-a="Saturday"><span>Мини-планер — мой личный оракул.</span></div>
+          <div class="option" data-q="4" data-a="Sunday"><span>Наушники-панцирь. Тихо — значит безопасно.</span></div>
+        </div>
+      </div>
+      <!-- Q5 -->
+      <div class="question">
+        <h3>5. Контрольная через два дня. Ход мыслей?</h3>
+        <div class="options">
+          <div class="option" data-q="5" data-a="Monday"><span>Соберу штурм-группу. Я — фасилитатор и муза.</span></div>
+          <div class="option" data-q="5" data-a="Tuesday"><span>Возьму конспекты у звезды. Повторю идеально.</span></div>
+          <div class="option" data-q="5" data-a="Wednesday"><span>Учить под тёмный плейлист. Значит — выжить.</span></div>
+          <div class="option" data-q="5" data-a="Thursday"><span>Я уже готова. Вчера. И позавчера.</span></div>
+          <div class="option" data-q="5" data-a="Friday"><span>Завтра. После бассейна. Возможно.</span></div>
+          <div class="option" data-q="5" data-a="Saturday"><span>Чётко по тайм-блокам. 60/10/60.</span></div>
+          <div class="option" data-q="5" data-a="Sunday"><span>Ночь перед дедлайном — мой жанр ужаса.</span></div>
+        </div>
+      </div>
+      <!-- Q6 -->
+      <div class="question">
+        <h3>6. Если бы ты была цветом?</h3>
+        <div class="options">
+          <div class="option" data-q="6" data-a="Monday"><span>Золото. Солнце власти.</span></div>
+          <div class="option" data-q="6" data-a="Tuesday"><span>Пастельная мята — мягкая опора.</span></div>
+          <div class="option" data-q="6" data-a="Wednesday"><span>Чёрный/ультрафиолет. Вечер лучше дня.</span></div>
+          <div class="option" data-q="6" data-a="Thursday"><span>Сапфир. Глубина логики.</span></div>
+          <div class="option" data-q="6" data-a="Friday"><span>Неон-фуксия. Видно отовсюду.</span></div>
+          <div class="option" data-q="6" data-a="Saturday"><span>Шампань/беж: чисто и собранно.</span></div>
+          <div class="option" data-q="6" data-a="Sunday"><span>Лаванда-туман. Я подумаю.</span></div>
+        </div>
+      </div>
+      <!-- Q7 -->
+      <div class="question">
+        <h3>7. Лайф-мантра на сегодня?</h3>
+        <div class="options">
+          <div class="option" data-q="7" data-a="Monday"><span>«Сказала — значит будет».</span></div>
+          <div class="option" data-q="7" data-a="Tuesday"><span>«Я рядом» — этого достаточно.</span></div>
+          <div class="option" data-q="7" data-a="Wednesday"><span>«Через тенёк — к звёздам».</span></div>
+          <div class="option" data-q="7" data-a="Thursday"><span>«Данные — это судьба».</span></div>
+          <div class="option" data-q="7" data-a="Friday"><span>«YOLO — но с бликом хайлайта».</span></div>
+          <div class="option" data-q="7" data-a="Saturday"><span>«Спокойствие — это план».</span></div>
+          <div class="option" data-q="7" data-a="Sunday"><span>«Аккуратно, но живу».</span></div>
+        </div>
+      </div>
+      <!-- Q8 -->
+      <div class="question">
+        <h3>8. Тебя зовут на главную вечеринку года. План?</h3>
+        <div class="options">
+          <div class="option" data-q="8" data-a="Monday"><span>Поздний вход с фанфарами. Запомнили? Отлично.</span></div>
+          <div class="option" data-q="8" data-a="Tuesday"><span>Прихожу дуэтом. Я — лучшая в поддержке.</span></div>
+          <div class="option" data-q="8" data-a="Wednesday"><span>Наблюдаю из тени. Микроулыбка — как награда.</span></div>
+          <div class="option" data-q="8" data-a="Thursday"><span>Тестирую социальную динамику. Пишу заметки.</span></div>
+          <div class="option" data-q="8" data-a="Friday"><span>Громче музыку. Я — аудиовизуальная вспышка.</span></div>
+          <div class="option" data-q="8" data-a="Saturday"><span>Вовремя пришла, вовремя ушла. Идеальный тайминг.</span></div>
+          <div class="option" data-q="8" data-a="Sunday"><span>Собиралась три часа, пришла на полчаса, переживала весь час.</span></div>
+        </div>
+      </div>
+
+      <button class="btn" id="submitBtn" disabled>Узнать своё место в Недельке</button>
+    </div>
+
+    <div id="result" class="hidden"></div>
+  </div>
+
+  <script>
+    const answers = {};
+    const options = document.querySelectorAll('.option');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const totalQuestions = document.querySelectorAll('.question').length;
+
+    progressLabel.textContent = `0% • 0 из ${totalQuestions}`;
+
+    options.forEach(opt=>{
+      opt.addEventListener('click',function(){
+        const q = this.dataset.q;
+        document.querySelectorAll(`[data-q="${q}"]`).forEach(o=>o.classList.remove('selected'));
+        this.classList.add('selected');
+        answers[q]=this.dataset.a;
+
+        const answered = Object.keys(answers).length;
+        const pct = Math.round(answered/totalQuestions*100);
+        progressBar.style.width = pct + '%';
+        progressLabel.textContent = `${pct}% • ${answered} из ${totalQuestions}`;
+
+        submitBtn.disabled = answered!==totalQuestions;
+      });
+    });
+
+    submitBtn.addEventListener('click', calculateResult);
+
+    const RESULT_MAP = {
+      Monday: {
+        icon:'👑',
+        title:'ПОНЕДЕЛЬНИК',
+        kicker:'Королева. Лидер. Первая.',
+        color:'linear-gradient(135deg,#f5af19 0%,#f12711 100%)',
+        border:'#f5af19',
+        text:`Ты задаёшь темп неделе и правила игры в школе №2. 
+Твоя харизма — закон, а вкус — референс для остальных. 
+Да, ты требовательна и к себе, и к миру — именно поэтому вокруг порядок и блеск.`,
+        chips:['Главная сцена','Референс-луки','Стратегия влияния','Золотые акценты'],
+        tip:`Используй свою силу, чтобы продюсировать других — так твоё сияние станет легендой.`
+      },
+      Tuesday: {
+        icon:'💕',
+        title:'ВТОРНИК',
+        kicker:'Верная подруга. Гармония. Связующая нить.',
+        color:'linear-gradient(135deg,#fbc2eb 0%,#a6c1ee 100%)',
+        border:'#fbc2eb',
+        text:`Ты — сердце коллектива. В тебе безопасно, с тобой всё получается. 
+Твоя эмпатия — не «мягкость», а металл: держит конструкцию, когда штормит.`,
+        chips:['Дуэты','Командная магия','Тёплый свет','Пастельная палитра'],
+        tip:`Ставь границы так же бережно, как заботишься о других — баланс только усилит твою магию.`
+      },
+      Wednesday: {
+        icon:'🖤',
+        title:'СРЕДА',
+        kicker:'Мрак-артистка. Ирония. Икона тени.',
+        color:'linear-gradient(135deg,#4a4a4a 0%,#1a1a2e 100%)',
+        border:'#4a4a4a',
+        text:`Ты видишь красоту там, где остальные видят только темноту. 
+Твой вкус — остр, как лезвие, твоя улыбка редка и потому бесценна.`,
+        chips:['Воронье перо','Винил и шипы','Фиолетовый сумрак','Сарказм-деликатес'],
+        tip:`Дозируй свою «тёмную роскошь» — и мир сам попросит продолжения банкета.`
+      },
+      Thursday: {
+        icon:'📚',
+        title:'ЧЕТВЕРГ',
+        kicker:'Вундеркинд. Система. Гений.',
+        color:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)',
+        border:'#667eea',
+        text:`На тебе держится академическая орбита «Недельки». 
+Ты превращаешь хаос в формулы, а мечты — в протоколы. Элегантная точность — твой стиль.`,
+        chips:['Олимпиады','Метрики & факты','Сапфировые детали','Тайм-блоки'],
+        tip:`Помни про витамины хаоса: иногда лучший инсайт приходит вне плана.`
+      },
+      Friday: {
+        icon:'✨',
+        title:'ПЯТНИЦА',
+        kicker:'Тусовщица. Искорка хаоса. Глянец в движении.',
+        color:'linear-gradient(135deg,#ff9966 0%,#ff5e62 100%)',
+        border:'#ff9966',
+        text:`Ты — вспышка, которая запускает музыку недели. 
+Твоё присутствие — событие, твой стиль — афиша. Ты даришь миру энергию «здесь и сейчас».`,
+        chips:['Неон-блики','Танцпол','Сторис-шторм','Шампанские пайетки'],
+        tip:`Сохраняй по одному утреннему «якорю» — вода, прогулка, тишина — и твой огонь будет ярче и дольше.`
+      },
+      Saturday: {
+        icon:'✅',
+        title:'СУББОТА',
+        kicker:'Продуктивная муза. Баланс. Лёгкая эффективность.',
+        color:'linear-gradient(135deg,#56ab2f 0%,#a8e063 100%)',
+        border:'#56ab2f',
+        text:`Ты всё успеваешь без суеты. 
+Не самая громкая, не самая пафосная — зато самая собранная и счастливая. Твой секрет — ритм.`,
+        chips:['Капсульный гардероб','Йога-блок','Чек-лист','Матовый нют'],
+        tip:`За награды — ритуал удовольствия. Привычки любят праздник.`
+      },
+      Sunday: {
+        icon:'🌙',
+        title:'ВОСКРЕСЕНЬЕ',
+        kicker:'Трепетная мечтательница. Последний дедлайн-самурай.',
+        color:'linear-gradient(135deg,#a18cd1 0%,#fbc2eb 100%)',
+        border:'#a18cd1',
+        text:`Ты тонко чувствуешь мир и себя — иногда это оборачивается тревогой. 
+Но твоя мягкость — суперсила: в нужный момент ты создаёшь чудо из ничего.`,
+        chips:['Лаванда','Тихие плейлисты','Ночные инсайты','Мягкие свитеры'],
+        tip:`Разбей страх на шаги из трёх минут. Начинай, не обещая себе идеала.`
+      }
+    };
+
+    function calculateResult(){
+      const counts={};
+      for(const q in answers){
+        const a = answers[q];
+        counts[a]=(counts[a]||0)+1;
+      }
+      const max = Math.max(...Object.values(counts));
+      const winners = Object.keys(counts).filter(k=>counts[k]===max);
+      const key = winners[Math.floor(Math.random()*winners.length)];
+      renderResult(key);
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function renderResult(key){
+      const box = document.getElementById('result');
+      const r = RESULT_MAP[key];
+      const copyText = `Я — ${r.title} из ковена «Неделька». Мои вайбы: ${r.kicker.toLowerCase()}. ${r.chips.slice(0,3).join(' • ')}.`;
+      box.classList.remove('hidden');
+      document.getElementById('quiz').classList.add('hidden');
+
+      box.innerHTML = `
+        <div class="result" style="border-color:${r.border};background-image:linear-gradient(135deg,rgba(255,255,255,.94),rgba(255,255,255,.8)),${r.color}">
+          <div class="result-icon">${r.icon}</div>
+          <div class="kicker">твоя роль в «Недельке»</div>
+          <h2>${r.title}</h2>
+          <div class="result-trait">${r.kicker}</div>
+          <p>${r.text}</p>
+          <div class="chips">${r.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>
+          <div class="cta-row">
+            <button class="btn" id="againBtn">Пройти ещё раз</button>
+            <button class="btn ghost" id="copyBtn">Скопировать результат</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('againBtn').addEventListener('click',resetQuiz);
+      document.getElementById('copyBtn').addEventListener('click',async ()=>{
+        try{
+          await navigator.clipboard.writeText(copyText);
+          const btn = document.getElementById('copyBtn');
+          const old = btn.textContent;
+          btn.textContent='Скопировано ✨';
+          setTimeout(()=>btn.textContent=old,1200);
+        }catch(e){alert('Не получилось скопировать, сорри :(')}
+      });
+    }
+
+    function resetQuiz(){
+      // clear selections
+      document.querySelectorAll('.option.selected').forEach(o=>o.classList.remove('selected'));
+      for(const k in answers) delete answers[k];
+      submitBtn.disabled = true;
+      document.getElementById('result').classList.add('hidden');
+      document.getElementById('quiz').classList.remove('hidden');
+      progressBar.style.width='0%';
+      progressLabel.textContent = `0% • 0 из ${totalQuestions}`;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>
